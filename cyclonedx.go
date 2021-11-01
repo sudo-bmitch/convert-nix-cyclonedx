@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -48,6 +49,12 @@ type cycloneHashes struct {
 }
 
 func NewCycloneFromNix(n *nix) (*cycloneDx, error) {
+	keys := make([]string, 0, len(*n))
+	for k := range *n {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
 	var err error
 	c := cycloneDx{
 		BomFormat:   "CycloneDX",
@@ -57,7 +64,8 @@ func NewCycloneFromNix(n *nix) (*cycloneDx, error) {
 	}
 	verRe := regexp.MustCompile("^.*-([0-9\\.]+)(\\.tar\\.gz|\\.tar\\.bz2|)$")
 
-	for _, entry := range *n {
+	for _, key := range keys {
+		entry := (*n)[key]
 		if entry.Env == nil {
 			continue
 		}
